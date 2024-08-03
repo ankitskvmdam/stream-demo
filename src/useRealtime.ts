@@ -25,6 +25,15 @@ export function useRealtime(name: string, config: TConfig) {
       video: { deviceId, height: { ideal: 1080 } },
     });
 
+    let stream = mediaManager.getStream();
+
+    if (stream) {
+      console.log("Already has a stream");
+      setVideoStream(stream);
+      setIsConnected(true);
+      return;
+    }
+
     const response = await mediaManager.initMedia();
 
     if (!response.ok) {
@@ -33,7 +42,7 @@ export function useRealtime(name: string, config: TConfig) {
       return;
     }
 
-    const stream = mediaManager.getStream();
+    stream = mediaManager.getStream();
     if (!stream) {
       setVideoStream(null);
       console.log("Unable to get stream");
