@@ -1,22 +1,13 @@
 import React, { useEffect } from "react";
-import { AdaptRealtimeProvider } from "./store/provider";
-import { VideoStream } from "./VideoStream";
+import { getAllUserDevices } from "./media-manager";
+import { Connection } from "./Connection";
 
 export default function App() {
   const [list, setList] = React.useState<MediaDeviceInfo[]>([]);
-  const [device1, setDevice1] = React.useState<string>();
-  const [device2, setDevice2] = React.useState<string>();
+  const [device, setDevice] = React.useState<string>();
 
   async function updateList() {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const _list: MediaDeviceInfo[] = [];
-
-    for (const device of devices) {
-      if (device.kind === "videoinput") {
-        _list.push(device);
-      }
-    }
-
+    const _list = await getAllUserDevices();
     setList(_list);
   }
 
@@ -35,8 +26,8 @@ export default function App() {
         <select
           name="device1"
           id="device1"
-          onChange={(e) => setDevice1(e.target.value)}
-          value={device1}
+          onChange={(e) => setDevice(e.target.value)}
+          value={device}
         >
           <option>Select Video source 1</option>
           {list.map((device) => (
@@ -47,29 +38,11 @@ export default function App() {
         </select>
       </div>
       <hr />
-      <div>
-        <span>Device 2</span>
-        <select
-          name="device2"
-          id="device2"
-          onChange={(e) => setDevice2(e.target.value)}
-          value={device2}
-        >
-          <option>Select Video source 2</option>
-          {list.map((device) => (
-            <option key={device.deviceId} value={device.deviceId}>
-              {device.kind} - {device.deviceId}
-            </option>
-          ))}
-        </select>
-      </div>
-      <hr />
-      <AdaptRealtimeProvider mediaId={device1}>
-        <VideoStream title="Device 1" />
-      </AdaptRealtimeProvider>
-      <AdaptRealtimeProvider mediaId={device2}>
-        <VideoStream title="Device 2" />
-      </AdaptRealtimeProvider>
+      {device && (
+        <Connection
+          config={{ functionURL: "adapt-infra-url", deviceId: device }}
+        />
+      )}
     </div>
   );
 }
